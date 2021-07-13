@@ -15,16 +15,6 @@ const config: webpack.Configuration = {
         use: ["html-loader"],
       },
       {
-        test: /\.(svg|png|jpg|gif)$/,
-        use: {
-          loader: "file-loader",
-          options: {
-            name: "[name].[hash].[ext]",
-            outputPath: "imgs",
-          },
-        },
-      },
-      {
         test: /\.tsx?$/,
         use: "ts-loader",
       },
@@ -37,9 +27,8 @@ const config: webpack.Configuration = {
   ],
   target: "browserslist",
   resolve: {
-    extensions: [".tsx", ".ts", ".js", ".jsx", ".css", ".html"],
+    extensions: [".ts", ".html"],
     mainFiles: ["index"],
-    modules: [".", "node_modules"],
   },
 };
 
