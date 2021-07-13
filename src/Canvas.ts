@@ -27,22 +27,9 @@ export class EditableCanvas {
    */
   constructor(cellLen: number) {
     this.canvas = document.getElementById("editor") as HTMLCanvasElement;
-    window.addEventListener("resize", () => this.updateCanvasDimensions);
     this.context = this.canvas.getContext("2d")!;
     this.cellLen = cellLen;
     this.map = rawJSON.map;
-    this.redrawCanvas();
-    this.updateCanvasDimensions();
-  }
-
-  /**
-   * Updates canvas' dimensions to be in sync with window
-   *
-   * @method updateCanvasDimensions
-   * @private
-   * @returns {void}
-   */
-  updateCanvasDimensions(): void {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
     this.redrawCanvas();
@@ -120,6 +107,8 @@ export class EditableCanvas {
    */
   redrawCanvas(): void {
     this.formatMap();
+    this.canvas.width = this.map[0].length * this.cellLen;
+    this.canvas.height = this.map.length * this.cellLen;
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.map.forEach((row: number[], rowIdx: number) =>
       row.forEach((cell: number, col: number) =>
