@@ -6,11 +6,12 @@ A simple map editing tool for my game; written in Typescript and built with a cu
 
 ## Usage:
 
-- left click to place a cell
-- right click to delete a cell (replace it with air)
-- scroll wheel to zoom in/out and arrow keys to move camera
-- space to save
+- left-click to place a cell
+- right-click to delete a cell
+- mouse wheel to zoom in/out and arrow keys to move camera
+- space to download map as .json
 - q, w, e to select Dirt, Grass, and Resource blocks, respectively (subsequent left-clicks will place this cell type)
+- to expand the canvas, place a cell in the white area
 
 ## Installation
 
@@ -18,5 +19,5 @@ Requires npm
 
 1. `git clone https://github.com/japraj/mapEditor.git`
 2. `cd mapEditor`
-3. install dependencies with `npm install`
-4. start a dev server on port 9000 with `npm start`; to change the port, edit the arg passed to `webpack serve` in package.json
+3. Install dependencies with `npm install`
+4. Start a dev server on port 9000 with `npm start`; to change the port, edit the arg passed to `webpack serve` in package.json
