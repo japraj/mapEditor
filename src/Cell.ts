@@ -3,6 +3,9 @@ export enum CellType {
   GRASS = 1,
   DIRT = 2,
   RESOURCE = 3,
+  ICE = 4,
+  FIRE = 5,
+  STONE = 6,
 }
 
 /**
@@ -36,6 +39,18 @@ export const CELL_DEFNS: Cell[] = [
   {
     type: CellType.RESOURCE,
     color: 0x800080,
+  },
+  {
+    type: CellType.ICE,
+    color: 0xdbf7ff,
+  },
+  {
+    type: CellType.FIRE,
+    color: 0xff7d00,
+  },
+  {
+    type: CellType.STONE,
+    color: 0x9b9ea1,
   },
 ];
 

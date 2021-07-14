@@ -10,8 +10,11 @@ const KEY_INPUTS: {
   [key: string]: CellType;
 } = {
   q: CellType.DIRT,
-  w: CellType.GRASS,
-  e: CellType.RESOURCE,
+  w: CellType.STONE,
+  e: CellType.GRASS,
+  r: CellType.RESOURCE,
+  t: CellType.ICE,
+  y: CellType.FIRE,
 };
 
 interface Input {
