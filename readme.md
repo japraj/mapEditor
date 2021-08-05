@@ -1,6 +1,6 @@
 ## MapEditor
 
-A simple map editing tool for my game; written in Typescript and built with a custom webpack config.
+A simple map editing tool for my game; written in Typescript and bundled with webpack.
 
 ![Picture of map editor](https://i.imgur.com/HWteMCf.png)
 
