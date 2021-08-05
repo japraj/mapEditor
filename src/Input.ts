@@ -5,6 +5,11 @@ import { Cell, CellType, CELL_DEFNS } from "./Cell";
  * cells of that type (until selected cell type is changed)
  *
  * Example: press w to select CellType.GRASS, and then left click at (10, 10) fills cell (10, 10) brown
+ *
+ * Keys are organized into rows:
+ * - top row (numbers) is resources
+ * - second row (qwerty) is environment
+ * - third row (asdf) is enemies
  */
 const KEY_INPUTS: {
   [key: string]: CellType;
@@ -12,9 +17,17 @@ const KEY_INPUTS: {
   q: CellType.DIRT,
   w: CellType.STONE,
   e: CellType.GRASS,
-  r: CellType.RESOURCE,
-  t: CellType.ICE,
-  y: CellType.FIRE,
+  r: CellType.ICE,
+  t: CellType.FIRE,
+
+  1: CellType.RESOURCE,
+  2: CellType.RES_HEAL,
+  3: CellType.RES_HEX,
+  4: CellType.RES_OCT,
+
+  a: CellType.ENEMY_PENT,
+  s: CellType.ENEMY_SEPT,
+  d: CellType.ENEMY_FLY,
 };
 
 interface Input {

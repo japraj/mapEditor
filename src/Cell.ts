@@ -6,6 +6,12 @@ export enum CellType {
   ICE = 4,
   FIRE = 5,
   STONE = 6,
+  RES_HEAL = 7,
+  RES_HEX = 8,
+  RES_OCT = 9,
+  ENEMY_PENT = 10,
+  ENEMY_SEPT = 11,
+  ENEMY_FLY = 12,
 }
 
 /**
@@ -38,7 +44,7 @@ export const CELL_DEFNS: Cell[] = [
   },
   {
     type: CellType.RESOURCE,
-    color: 0x800080,
+    color: 0xfcf5c7,
   },
   {
     type: CellType.ICE,
@@ -51,6 +57,30 @@ export const CELL_DEFNS: Cell[] = [
   {
     type: CellType.STONE,
     color: 0x9b9ea1,
+  },
+  {
+    type: CellType.RES_HEAL,
+    color: 0xddff9e,
+  },
+  {
+    type: CellType.RES_HEX,
+    color: 0x6ea4f4,
+  },
+  {
+    type: CellType.RES_OCT,
+    color: 0xe004b4,
+  },
+  {
+    type: CellType.ENEMY_PENT,
+    color: 0xff9eac,
+  },
+  {
+    type: CellType.ENEMY_SEPT,
+    color: 0xff6b6b,
+  },
+  {
+    type: CellType.ENEMY_FLY,
+    color: 0x800080,
   },
 ];
 

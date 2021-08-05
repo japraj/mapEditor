@@ -1,5 +1,9 @@
+import rawTestJSON from "../def/test.json";
 import rawJSON from "../def/map.json";
 import { Cell, CELL_DEFNS } from "./Cell";
+
+// should the test map be used, or the main map?
+const TEST_MAP: boolean = true;
 
 /**
  * Encapsulates canvas interaction, providing a simple api to edit a particular cell, and to arbitrarily
@@ -29,7 +33,7 @@ export class EditableCanvas {
     this.canvas = document.getElementById("editor") as HTMLCanvasElement;
     this.context = this.canvas.getContext("2d")!;
     this.cellLen = cellLen;
-    this.map = rawJSON.map;
+    this.map = TEST_MAP ? rawTestJSON.map : rawJSON.map;
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
     this.redrawCanvas();
@@ -135,7 +139,7 @@ export class EditableCanvas {
         type: "application/json",
       })
     );
-    a.setAttribute("download", "map.json");
+    a.setAttribute("download", TEST_MAP ? "test.json" : "map.json");
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

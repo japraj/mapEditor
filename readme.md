@@ -10,7 +10,8 @@ A simple map editing tool for my game; written in Typescript and built with a cu
 - right-click to delete a cell
 - mouse wheel to zoom in/out and arrow keys to move camera
 - space to download map as .json
-- q, w, e, r, t, y to select Dirt, Grass, Stone, Resource, Ice, and Fire blocks, respectively (subsequent left-clicks will place this cell type)
+- q, w, e to select Dirt, Grass, Stone, respectively (subsequent left-clicks will place this cell type). See src/Input.ts to see what else can be placed.
+  Keys are organized into rows: top row (numbers) is resources, second row (qwerty) is environment, third row (asdf) is enemies
 - to expand the canvas, place a cell in the white area
 
 ## Installation
