@@ -10,6 +10,7 @@ import { Cell, CellType, CELL_DEFNS } from "./Cell";
  * - top row (numbers) is resources
  * - second row (qwerty) is environment
  * - third row (asdf) is enemies
+ * - fourth row (zxcv) is special/miscellaneous
  */
 const KEY_INPUTS: {
   [key: string]: CellType;
@@ -28,6 +29,8 @@ const KEY_INPUTS: {
   a: CellType.ENEMY_PENT,
   s: CellType.ENEMY_SEPT,
   d: CellType.ENEMY_FLY,
+
+  z: CellType.SPAWN_POS,
 };
 
 interface Input {
@@ -73,7 +76,15 @@ export const registerInputHandlers = (editableCanvas: EditableCanvas): void => {
 
     if (editableCanvas.input.leftPressed) {
       // main button (left click)
-      cell = CELL_DEFNS[editableCanvas.input.selectedCell];
+      // spawn pos is handled differently from other cells
+      if (editableCanvas.input.selectedCell === CellType.SPAWN_POS) {
+        editableCanvas.setSpawnPos({
+          x: Math.floor(ev.pageX / editableCanvas.cellLen),
+          y: Math.floor(ev.pageY / editableCanvas.cellLen),
+        });
+      } else {
+        cell = CELL_DEFNS[editableCanvas.input.selectedCell];
+      }
     } else if (editableCanvas.input.rightPressed) {
       // secondary button (right click)
       cell = CELL_DEFNS[CellType.AIR];

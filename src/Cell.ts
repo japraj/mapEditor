@@ -12,6 +12,7 @@ export enum CellType {
   ENEMY_PENT = 10,
   ENEMY_SEPT = 11,
   ENEMY_FLY = 12,
+  SPAWN_POS = 999, // does not get written to map data; the Canvas handles this specially!
 }
 
 /**
@@ -85,7 +86,7 @@ export const CELL_DEFNS: Cell[] = [
 ];
 
 /**
- * Check that CELL_DEFNS has same order as the CellType enum
+ * Check that CELL_DEFNS has same order as the CellType enum (basic runtime check)
  *
  * @throws {Error} if there is an inconsistency
  * @returns {void}
