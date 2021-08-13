@@ -1,8 +1,9 @@
-import rawTestJSON from "../def/test.json";
 import rawJSON from "../def/map.json";
+import rawTestJSON from "../def/test.json";
 import { Cell, CellType, CELL_DEFNS } from "./Cell";
+import { Input } from "./Input";
 
-// should the test map be used, or the main map?
+// should the test map be used, or the main map? (if this is true, will load from 'test.json' instead of 'map.json')
 const TEST_MAP: boolean = false;
 // color of spawn position cell
 const SPAWN_POS_COLOR: number = 0x00ffff;
@@ -22,6 +23,7 @@ export interface Vector {
  * @property {number[][]} map map being edited
  * @property {Vector}
  * @property {number} cellLen length of cells on canvas (each map element represents a cell)
+ * @property {number} cursorRadius determines radius of cursor/interactions
  * @property {any} input field used by input handlers to store data; ugly but simple
  */
 export class EditableCanvas {
@@ -30,7 +32,8 @@ export class EditableCanvas {
   readonly map: number[][];
   spawnPos: Vector;
   cellLen: number;
-  input: any;
+  cursorRadius: number;
+  input: Input;
 
   /**
    * Initializes fields, draws initial canvas based on out/map.json
@@ -47,23 +50,30 @@ export class EditableCanvas {
     this.spawnPos = JSON.spawnPosition;
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
+    this.cursorRadius = 1;
+    this.input = {
+      selectedCell: CellType.GRASS,
+      leftPressed: false,
+      rightPressed: false,
+      clientX: 0,
+      clientY: 0,
+    };
     this.redrawCanvas();
   }
 
   /**
-   * Fills cell that (x, y) is a member of with cell.color; note that x, y are in px
+   * Fills cell that (x, y) is a member of with cell.color
    *
    * @method fillCell
-   * @param {number} x
-   * @param {number} y
-   * @param {Cell} cell
+   * @param {number} x coord in px
+   * @param {number} y coord in px
+   * @param {Cell} cell type to fill cell with
    * @returns {void}
    */
   fillCell(x: number, y: number, cell: Cell): void {
     // floor x, y to be the top left of some cell
     x -= x % this.cellLen;
     y -= y % this.cellLen;
-
     var redrawCanvas: boolean = false;
     var row: undefined | number[] = this.map[y / this.cellLen];
 
@@ -78,6 +88,37 @@ export class EditableCanvas {
     this.context.fillStyle = "#" + cell.color.toString(16).padStart(6, "0");
     this.context.fillRect(x, y, this.cellLen, this.cellLen);
     if (redrawCanvas) this.redrawCanvas();
+  }
+
+  /**
+   * Fills all cells in square of radius `this.cellLen * this.cursorRadius` centered at cell corresponding to (x, y) with specified Cell type
+   *
+   * @method fillRegion
+   * @param {number} x coord in px
+   * @param {number} y coord in px
+   * @param {number} cell type to fill region with
+   * @returns {void}
+   */
+  fillRegion(x: number, y: number, cell: Cell): void {
+    x -= x % this.cellLen;
+    y -= y % this.cellLen;
+    var pxRadius = this.cursorRadius * this.cellLen;
+    for (
+      var pY: number = y - pxRadius;
+      pY <= y + pxRadius;
+      pY += this.cellLen
+    ) {
+      for (
+        var pX: number = x - pxRadius;
+        pX <= x + pxRadius;
+        pX += this.cellLen
+      ) {
+        try {
+          this.fillCell(pX, pY, cell);
+        } catch {}
+      }
+    }
+    this.colorCellMapIdx(this.spawnPos.x, this.spawnPos.y, SPAWN_POS_COLOR);
   }
 
   /**
@@ -98,6 +139,78 @@ export class EditableCanvas {
       this.cellLen,
       this.cellLen
     );
+  }
+
+  /**
+   * Repaints a region of cells around x, y (px)
+   *
+   * @method repaintRegion
+   * @param {number} x
+   * @param {number} y
+   * @returns {void}
+   */
+  repaintRegion(x: number, y: number): void {
+    var radius = this.cursorRadius + 10; // +10 is to ensure that the repainting keeps up with any fast movements
+    x = Math.floor(x / this.cellLen);
+    y = Math.floor(y / this.cellLen);
+    for (var pY: number = y - radius; pY <= y + radius; pY++) {
+      for (var pX: number = x - radius; pX <= x + radius; pX++) {
+        try {
+          // try-catch lets us ignore out of range errors without breaking anything!
+          this.context.fillStyle =
+            "#" +
+            CELL_DEFNS[this.map[pY][pX]].color.toString(16).padStart(6, "0");
+          this.context.fillRect(
+            pX * this.cellLen,
+            pY * this.cellLen,
+            this.cellLen,
+            this.cellLen
+          );
+        } catch {}
+      }
+    }
+    this.colorCellMapIdx(this.spawnPos.x, this.spawnPos.y, SPAWN_POS_COLOR);
+  }
+
+  /**
+   * Outlines the cell being hovered over by the user's cursor
+   *
+   * @method drawCursor
+   * @returns {void}
+   */
+  drawCursor(): void {
+    var x = this.input.clientX + window.scrollX,
+      y = this.input.clientY + window.scrollY;
+    x -= x % this.cellLen;
+    y -= y % this.cellLen;
+    this.context.strokeStyle = "black";
+    this.context.strokeRect(
+      x - this.cursorRadius * this.cellLen,
+      y - this.cursorRadius * this.cellLen,
+      this.cellLen * (2 * this.cursorRadius + 1),
+      this.cellLen * (2 * this.cursorRadius + 1)
+    );
+  }
+
+  /**
+   * Updates input state mouse position; newX, newY are optional; if either one is not specified, simply
+   * redraws cursor and makes no changes to this.input
+   *
+   * @method updateCursor
+   * @param {undefined | number} newX
+   * @param {unedfined | number} newY
+   * @returns {void}
+   */
+  updateCursor(newX?: number, newY?: number): void {
+    this.repaintRegion(
+      this.input.clientX + window.scrollX,
+      this.input.clientY + window.scrollY
+    );
+    if (newX && newY) {
+      this.input.clientX = newX;
+      this.input.clientY = newY;
+    }
+    this.drawCursor();
   }
 
   /**
@@ -137,6 +250,15 @@ export class EditableCanvas {
   setCellLen(cellLen: number): void {
     this.cellLen = cellLen;
     this.redrawCanvas();
+  }
+
+  setCursorRadius(cursorRadius: number): void {
+    this.repaintRegion(
+      this.input.clientX + window.scrollX,
+      this.input.clientY + window.scrollY
+    );
+    this.cursorRadius = cursorRadius;
+    this.drawCursor();
   }
 
   /**
@@ -182,6 +304,7 @@ export class EditableCanvas {
       )
     );
     this.colorCellMapIdx(this.spawnPos.x, this.spawnPos.y, SPAWN_POS_COLOR);
+    this.drawCursor();
   }
 
   /**
