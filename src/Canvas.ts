@@ -252,13 +252,16 @@ export class EditableCanvas {
     this.redrawCanvas();
   }
 
+  /**
+   * Sets new value for cursor radius if it is non-negative and not too large, and redraws cursor
+   *
+   * @param {number} cursorRadius new value
+   * @returns
+   */
   setCursorRadius(cursorRadius: number): void {
-    this.repaintRegion(
-      this.input.clientX + window.scrollX,
-      this.input.clientY + window.scrollY
-    );
+    if (cursorRadius < 0 || cursorRadius > 20) return;
     this.cursorRadius = cursorRadius;
-    this.drawCursor();
+    this.updateCursor();
   }
 
   /**
