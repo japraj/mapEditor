@@ -12,6 +12,8 @@ export enum CellType {
   ENEMY_PENT = 10,
   ENEMY_SEPT = 11,
   ENEMY_FLY = 12,
+  PLATFORM = 13,
+  CRUSHER = 14,
   SPAWN_POS = 999, // does not get written to map data; the Canvas handles this specially!
 }
 
@@ -82,6 +84,14 @@ export const CELL_DEFNS: Cell[] = [
   {
     type: CellType.ENEMY_FLY,
     color: 0x800080,
+  },
+  {
+    type: CellType.PLATFORM,
+    color: 0x13344c,
+  },
+  {
+    type: CellType.CRUSHER,
+    color: 0xff0000,
   },
 ];
 

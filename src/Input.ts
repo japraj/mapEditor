@@ -31,6 +31,8 @@ const KEY_INPUTS: {
   d: CellType.ENEMY_FLY,
 
   z: CellType.SPAWN_POS,
+  x: CellType.PLATFORM,
+  c: CellType.CRUSHER,
 };
 
 /**

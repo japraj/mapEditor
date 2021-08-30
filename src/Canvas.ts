@@ -4,7 +4,7 @@ import { Cell, CellType, CELL_DEFNS } from "./Cell";
 import { Input } from "./Input";
 
 // should the test map be used, or the main map? (if this is true, will load from 'test.json' instead of 'map.json')
-const TEST_MAP: boolean = false;
+const TEST_MAP: boolean = true;
 // color of spawn position cell
 const SPAWN_POS_COLOR: number = 0x00ffff;
 
@@ -284,6 +284,7 @@ export class EditableCanvas {
       // pad row so we have a perfect rectangular array
       while (row.length < maxRowLen) row.push(0);
     }
+    this.map[this.spawnPos.y][this.spawnPos.x] = CellType.AIR;
   }
 
   /**
