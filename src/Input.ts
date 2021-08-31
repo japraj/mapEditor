@@ -60,7 +60,7 @@ export interface Input {
 /** Reacts to the state of ec.input */
 const processInput = (ec: EditableCanvas): void => {
   const is = ec.input; // input state
-  var cell: undefined | Cell = undefined;
+  let cell: undefined | Cell = undefined;
 
   if (is.leftPressed) {
     // main button (left click)
@@ -129,7 +129,7 @@ export const registerInputHandlers = (ec: EditableCanvas): void => {
 
   // zoom (change cell len, with some clamping)
   window.addEventListener("wheel", (ev: WheelEvent) => {
-    var cellLen = ec.cellLen;
+    let cellLen = ec.cellLen;
     if (ev.deltaY > 0) {
       cellLen--;
       if (cellLen < 4) cellLen = 4;
@@ -150,7 +150,7 @@ export const registerInputHandlers = (ec: EditableCanvas): void => {
     } else if (ev.key === "-" || ev.key === "_") {
       ec.setCursorRadius(ec.cursorRadius - 1);
     } else {
-      for (var key in KEY_INPUTS) {
+      for (let key in KEY_INPUTS) {
         if (ev.key === key || ev.key === key.toUpperCase()) {
           is.selectedCell = KEY_INPUTS[key];
           return; // terminate search
@@ -165,7 +165,7 @@ export const registerInputHandlers = (ec: EditableCanvas): void => {
    */
   const TPS = 60; // ticks per second
   const tickPeriod = 1000 / TPS; // time between update calls
-  var prev: DOMHighResTimeStamp = window.performance.now(); // timestamp of prev processInput call
+  let prev: DOMHighResTimeStamp = window.performance.now(); // timestamp of prev processInput call
   const update = (now: DOMHighResTimeStamp) => {
     if (now - prev >= tickPeriod) {
       processInput(ec);

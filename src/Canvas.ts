@@ -71,8 +71,8 @@ export class EditableCanvas {
     // floor x, y to be the top left of some cell
     x -= x % this.cellLen;
     y -= y % this.cellLen;
-    var redrawCanvas: boolean = false;
-    var row: undefined | number[] = this.map[y / this.cellLen];
+    let redrawCanvas: boolean = false;
+    let row: undefined | number[] = this.map[y / this.cellLen];
 
     if (!row) {
       row = this.map[y / this.cellLen] = [];
@@ -98,14 +98,14 @@ export class EditableCanvas {
   fillRegion(x: number, y: number, cell: Cell): void {
     x -= x % this.cellLen;
     y -= y % this.cellLen;
-    var pxRadius = this.cursorRadius * this.cellLen;
+    let pxRadius = this.cursorRadius * this.cellLen;
     for (
-      var pY: number = y - pxRadius;
+      let pY: number = y - pxRadius;
       pY <= y + pxRadius;
       pY += this.cellLen
     ) {
       for (
-        var pX: number = x - pxRadius;
+        let pX: number = x - pxRadius;
         pX <= x + pxRadius;
         pX += this.cellLen
       ) {
@@ -145,11 +145,11 @@ export class EditableCanvas {
    */
   repaintRegion(x: number, y: number): void {
     // + 10 is to ensure that the repainting keeps up with any fast movements
-    var radius = this.cursorRadius + 10;
+    let radius = this.cursorRadius + 10;
     x = Math.floor(x / this.cellLen);
     y = Math.floor(y / this.cellLen);
-    for (var pY: number = y - radius; pY <= y + radius; pY++) {
-      for (var pX: number = x - radius; pX <= x + radius; pX++) {
+    for (let pY: number = y - radius; pY <= y + radius; pY++) {
+      for (let pX: number = x - radius; pX <= x + radius; pX++) {
         try {
           // try-catch lets us ignore out of range errors!
           this.context.fillStyle = toColorString(
@@ -188,7 +188,7 @@ export class EditableCanvas {
 
   /** Outlines the cell being hovered over by the user's cursor */
   paintCursor(): void {
-    var x = this.input.clientX + window.scrollX,
+    let x = this.input.clientX + window.scrollX,
       y = this.input.clientY + window.scrollY;
     x -= x % this.cellLen;
     y -= y % this.cellLen;
@@ -266,10 +266,10 @@ export class EditableCanvas {
       (acc: number, row: number[]) => (row.length > acc ? row.length : acc),
       0
     );
-    for (var rowIdx: number = 0; rowIdx < this.map.length; rowIdx++) {
-      var row: undefined | number[] = this.map[rowIdx];
+    for (let rowIdx: number = 0; rowIdx < this.map.length; rowIdx++) {
+      let row: undefined | number[] = this.map[rowIdx];
       if (row === undefined) row = this.map[rowIdx] = [];
-      for (var col: number = 0; col < row.length; col++)
+      for (let col: number = 0; col < row.length; col++)
         // we sometimes have stray undefined values floating around due to random array access
         if (row[col] === undefined) row[col] = 0;
       // pad row so we have a perfect rectangular array
