@@ -14,23 +14,26 @@ export enum CellType {
   ENEMY_FLY = 12,
   PLATFORM = 13,
   CRUSHER = 14,
+  YEETER = 15,
+  LAVA = 16,
   SPAWN_POS = 999, // does not get written to map data; the Canvas handles this specially!
 }
 
-/**
- * @typedef Cell a cell on the map
- *
- * @property {CellType} type type of cell; the numeric value is what is used in JSON representation of the map
- * @property {number} color hex color used for cells of this type
- */
+/** A cell on the map/canvas */
 export interface Cell {
+  /**
+   * Type of the cell; the numeric value is what is used in JSON representation
+   * of the map
+   */
   type: CellType;
+  /** Color in hex that is used for cells of this type on the canvas */
   color: number;
 }
 
-// ! The order of the CELL_DEFNS must be the same as the order in which they are declared in the enum;
-// ! this allows us to use the notation CELL_DEFINS[CellType.DIRT].color. The function validateCellDefs
-// ! is run at init to ensure this is the case (still a runtime check though)
+// ! The order of the CELL_DEFNS must be the same as the order in which they
+// ! are declared in the enum; this allows us to use the notation
+// ! CELL_DEFINS[CellType.DIRT].color. The function validateCellDefs is run at
+// ! init to ensure this is the case (still a runtime check though)
 export const CELL_DEFNS: Cell[] = [
   {
     type: CellType.AIR,
@@ -87,11 +90,19 @@ export const CELL_DEFNS: Cell[] = [
   },
   {
     type: CellType.PLATFORM,
-    color: 0x13344c,
+    color: 0x000000,
   },
   {
     type: CellType.CRUSHER,
     color: 0xff0000,
+  },
+  {
+    type: CellType.YEETER,
+    color: 0x13344c,
+  },
+  {
+    type: CellType.LAVA,
+    color: 0xbf5c00,
   },
 ];
 
@@ -99,7 +110,6 @@ export const CELL_DEFNS: Cell[] = [
  * Check that CELL_DEFNS has same order as the CellType enum (basic runtime check)
  *
  * @throws {Error} if there is an inconsistency
- * @returns {void}
  */
 export const validateCellDefs = (): void => {
   CELL_DEFNS.forEach((value: Cell, index: number) => {

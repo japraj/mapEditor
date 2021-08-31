@@ -1,76 +1,74 @@
 import { EditableCanvas } from "./Canvas";
 import { Cell, CellType, CELL_DEFNS } from "./Cell";
 
-/* User can press a key to select a particular CellType and then all subsequent left-clicks will place
- * cells of that type (until selected cell type is changed)
+/* The user can press a key to select a particular CellType and then all
+ * subsequent left-clicks will place cells of that type (until the selected
+ * cell type is changed)
  *
- * Example: press w to select CellType.GRASS, and then left click at (10, 10) fills cell (10, 10) brown
+ * Example: press w to select CellType.STONE, and then left click at (10, 10)
+ * to fill the cell at (10, 10) with grey
  *
  * Keys are organized into rows:
  * - top row (numbers) is resources
  * - second row (qwerty) is environment
  * - third row (asdf) is enemies
- * - fourth row (zxcv) is special/miscellaneous
+ * - fourth row (zxcv) is special
  */
 const KEY_INPUTS: {
   [key: string]: CellType;
 } = {
+  // resources
+  1: CellType.RESOURCE,
+  2: CellType.RES_HEAL,
+  3: CellType.RES_HEX,
+  4: CellType.RES_OCT,
+  // environment
   q: CellType.DIRT,
   w: CellType.STONE,
   e: CellType.GRASS,
   r: CellType.ICE,
   t: CellType.FIRE,
-
-  1: CellType.RESOURCE,
-  2: CellType.RES_HEAL,
-  3: CellType.RES_HEX,
-  4: CellType.RES_OCT,
-
+  // enemies
   a: CellType.ENEMY_PENT,
   s: CellType.ENEMY_SEPT,
   d: CellType.ENEMY_FLY,
-
+  // special
   z: CellType.SPAWN_POS,
   x: CellType.PLATFORM,
   c: CellType.CRUSHER,
+  v: CellType.YEETER,
+  b: CellType.LAVA,
 };
 
 /**
- * @typedef Input simple interface for user input, pieced together by registering listeners on several
- * events.
- *
- * @property {CellType} selectedCell currently selected cell type (left click places cells of selected type)
- * @property {boolean} leftPressed is left-click currently held?
- * @property {boolean} rightPressed is right-click currently held?
- * @property {number} clientX offset of mouseX from left of viewport
- * @property {number} clientY offset of mouseY from top of viewport
- *
+ * Simple abstraction on user input, pieced together by registering listeners
+ * on several events
  */
 export interface Input {
+  /** Currently selected cell type; left-clicks place cells of this type */
   selectedCell: CellType;
+  /** Is left-click currently held? */
   leftPressed: boolean;
+  /** Is right-click currently held? */
   rightPressed: boolean;
+  /** Offset of mouseX from left bound of viewport */
   clientX: number;
+  /** Offset of mouseY from upper bound of viewport */
   clientY: number;
 }
 
-/**
- * Reacts to state of editableCanvas.input
- *
- * @param {EditableCanvas} editableCanvas
- * @returns {void}
- */
-const processInput = (editableCanvas: EditableCanvas): void => {
-  const is = editableCanvas.input; // input state
+/** Reacts to the state of ec.input */
+const processInput = (ec: EditableCanvas): void => {
+  const is = ec.input; // input state
   var cell: undefined | Cell = undefined;
 
   if (is.leftPressed) {
     // main button (left click)
     // spawn pos is handled differently from other cells
     if (is.selectedCell === CellType.SPAWN_POS) {
-      editableCanvas.setSpawnPos({
-        x: Math.floor((is.clientX + window.scrollX) / editableCanvas.cellLen),
-        y: Math.floor((is.clientY + window.scrollY) / editableCanvas.cellLen),
+      ec.setSpawnPos({
+        x: Math.floor((is.clientX + window.scrollX) / ec.cellLen),
+        y: Math.floor((is.clientY + window.scrollY) / ec.cellLen),
       });
     } else {
       cell = CELL_DEFNS[is.selectedCell];
@@ -81,7 +79,7 @@ const processInput = (editableCanvas: EditableCanvas): void => {
   }
 
   if (cell) {
-    editableCanvas.fillRegion(
+    ec.fillRegion(
       is.clientX + window.scrollX,
       is.clientY + window.scrollY,
       cell
@@ -90,20 +88,21 @@ const processInput = (editableCanvas: EditableCanvas): void => {
 };
 
 /**
- * Registers mouse, keyboard input handlers which constantly update editableCanvas.input to reflect
- * the current state of the user's input, and starts input listener loop
- * - left-click + optional drag: place a cell of the currently selected type on current mouse position
- * - right-click + optional drag: delete cell (i.e. place air) at current mouse position
+ * Registers mouse, keyboard input handlers which constantly update ec.input
+ * to reflect the current state of the user's input, and starts input-listener
+ * loop
+ *
+ * - left-click + optional drag: place a cell of the currently selected type on
+ *   current mouse position
+ * - right-click + optional drag: delete cell (i.e. place air) at current
+ *   mouse position
  * - space key: save/download edited map
  * - other keys are automatically handled based on the constant KEY_INPUTS
  * - scroll up zooms in (increases cell len)
  * - scroll down zooms out (decreases cell len)
- *
- * @param {EditableCanvas} editableCanvas
- * @returns {void}
  */
-export const registerInputHandlers = (editableCanvas: EditableCanvas): void => {
-  const is = editableCanvas.input; // input state
+export const registerInputHandlers = (ec: EditableCanvas): void => {
+  const is = ec.input; // input state
 
   // mouse stuff
   const processMouseEvent = (ev: MouseEvent, newValue: boolean): void => {
@@ -115,7 +114,7 @@ export const registerInputHandlers = (editableCanvas: EditableCanvas): void => {
         is.rightPressed = newValue;
         break;
     }
-    editableCanvas.updateCursor(ev.clientX, ev.clientY);
+    ec.updateCursorPos(ev.clientX, ev.clientY);
   };
 
   window.addEventListener("mousedown", (ev: MouseEvent) =>
@@ -125,12 +124,12 @@ export const registerInputHandlers = (editableCanvas: EditableCanvas): void => {
     processMouseEvent(ev, false)
   );
   window.addEventListener("mousemove", (ev: MouseEvent) =>
-    editableCanvas.updateCursor(ev.clientX, ev.clientY)
+    ec.updateCursorPos(ev.clientX, ev.clientY)
   );
 
   // zoom (change cell len, with some clamping)
   window.addEventListener("wheel", (ev: WheelEvent) => {
-    var cellLen = editableCanvas.cellLen;
+    var cellLen = ec.cellLen;
     if (ev.deltaY > 0) {
       cellLen--;
       if (cellLen < 4) cellLen = 4;
@@ -138,18 +137,18 @@ export const registerInputHandlers = (editableCanvas: EditableCanvas): void => {
       cellLen++;
       if (cellLen > 80) cellLen = 80;
     }
-    editableCanvas.setCellLen(cellLen);
-    editableCanvas.updateCursor();
+    ec.setCellLen(cellLen);
+    ec.updateCursorPos();
   });
 
   // key handling
   window.addEventListener("keydown", (ev: KeyboardEvent) => {
     if (ev.key === " ") {
-      editableCanvas.save();
+      ec.save();
     } else if (ev.key === "+" || ev.key === "=") {
-      editableCanvas.setCursorRadius(editableCanvas.cursorRadius + 1);
+      ec.setCursorRadius(ec.cursorRadius + 1);
     } else if (ev.key === "-" || ev.key === "_") {
-      editableCanvas.setCursorRadius(editableCanvas.cursorRadius - 1);
+      ec.setCursorRadius(ec.cursorRadius - 1);
     } else {
       for (var key in KEY_INPUTS) {
         if (ev.key === key || ev.key === key.toUpperCase()) {
@@ -158,18 +157,18 @@ export const registerInputHandlers = (editableCanvas: EditableCanvas): void => {
         }
       }
     }
-    editableCanvas.updateCursor();
+    ec.updateCursorPos();
   });
 
   /**
-   * Input listener loop; constantly updates the canvas
+   * Input-listener loop; constantly updates the canvas
    */
   const TPS = 60; // ticks per second
   const tickPeriod = 1000 / TPS; // time between update calls
   var prev: DOMHighResTimeStamp = window.performance.now(); // timestamp of prev processInput call
   const update = (now: DOMHighResTimeStamp) => {
     if (now - prev >= tickPeriod) {
-      processInput(editableCanvas);
+      processInput(ec);
       prev = now;
     }
     window.requestAnimationFrame(update);
