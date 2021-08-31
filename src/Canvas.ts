@@ -1,5 +1,7 @@
 import rawJSON from "../def/map.json";
+import rawCelldata from "../def/mapCelldata.json";
 import rawTestJSON from "../def/test.json";
+import rawTestCelldata from "../def/testCelldata.json";
 import { Cell, CellType, CELL_DEFNS } from "./Cell";
 import { Input } from "./Input";
 
@@ -15,9 +17,30 @@ export interface Vector {
   y: number;
 }
 
+/**
+ * The Celldata system allows us to associate arbitrary data with a particular
+ * cell. For example, if we want to use sign cells to display some kind of
+ * mesage at a particular location in the world, we would store the sign cell
+ * as usual in the map file, but the message itself is considered Celldata,
+ * and we would store that in the appropriate Celldata json file. Celldata is
+ * stored in a separate file because by nature, it does not follow any
+ * pattern and therefore cannot be compressed the way map files can be.
+ *
+ * All Celldata satisifes this interface at the bare minimum. Note that the
+ * purpose of Celldata is to associate some arbitrary object with a particular
+ * cell, so Celldata objects should always have at least one additional
+ * property (otherwise it is pointless).
+ */
+interface Celldata {
+  cell: Vector;
+}
+
 /** Converts color to a valid CSS color; example: 0x00ff00 -> '#00ff00' */
 const toColorString = (color: number): string =>
   "#" + color.toString(16).padStart(6, "0");
+
+/** Generates a unique string representing the given ordered pair */
+const hash = (x: number, y: number): string => x + "_" + y;
 
 /**
  * Encapsulates canvas interaction, providing a simple api to edit a
@@ -38,6 +61,7 @@ export class EditableCanvas {
   /** Radius of cursor interactions */
   cursorRadius: number;
   input: Input;
+  celldata: Map<string, object>;
 
   /** Initializes fields, draws initial canvas based on out/map.json */
   constructor() {
@@ -57,7 +81,32 @@ export class EditableCanvas {
       clientX: 0,
       clientY: 0,
     };
+    this.celldata = new Map();
+    const celldataSrc: Celldata[] = (TEST_MAP ? rawTestCelldata : rawCelldata)
+      .data;
+    for (let i: number = 0; i < celldataSrc.length; i++) {
+      const obj: Celldata = celldataSrc[i];
+      this.celldata.set(hash(obj.cell.x, obj.cell.y), obj);
+    }
     this.repaintCanvas();
+  }
+
+  /** Deletes celldata associated with cell (x, y) (units of cells) */
+  deleteCelldata(x: number, y: number): void {
+    this.celldata.delete(hash(x, y));
+  }
+
+  /**
+   * Adds a generic celldata object associated with cell (x, y) (units of
+   * cells) of the form '{cell: {x: x, y: y}}'
+   */
+  assignCelldata(x: number, y: number): void {
+    this.celldata.set(hash(x, y), {
+      cell: {
+        x: x,
+        y: y,
+      },
+    });
   }
 
   /**
@@ -81,7 +130,18 @@ export class EditableCanvas {
     if (x / this.cellLen >= row.length) {
       redrawCanvas = true;
     }
+    // if the old cell had celldata associated with it, delete it
+    if (CELL_DEFNS[row[x / this.cellLen]].celldata) {
+      this.deleteCelldata(x / this.cellLen, y / this.cellLen);
+    }
     row[x / this.cellLen] = cell.type;
+    // if the new cell type requires celldata, assign a new obj. Note that it
+    // may be the case that the old one has celldata and the new one does notO,
+    // so we cannot omit the delete callO
+    if (cell.celldata) {
+      this.assignCelldata(x / this.cellLen, y / this.cellLen);
+    }
+
     this.context.fillStyle = toColorString(cell.color);
     this.context.fillRect(x, y, this.cellLen, this.cellLen);
     if (redrawCanvas) this.repaintCanvas();
@@ -278,22 +338,39 @@ export class EditableCanvas {
     this.map[this.spawnPos.y][this.spawnPos.x] = CellType.AIR;
   }
 
-  /** Downloads map as a json file */
-  save(): void {
-    this.formatMap();
+  /** Downloads  */
+  download(contents: object, fileName: string): void {
     const a: HTMLAnchorElement = document.createElement("a");
     a.href = URL.createObjectURL(
-      new Blob(
-        [JSON.stringify({ data: this.map, spawnPosition: this.spawnPos })],
-        {
-          type: "application/json",
-        }
-      )
+      new Blob([JSON.stringify(contents)], {
+        type: "application/json",
+      })
     );
-    a.setAttribute("download", TEST_MAP ? "test.json" : "map.json");
+    a.setAttribute("download", fileName);
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
+  }
+
+  /** Downloads map and celldata as json files */
+  save(): void {
+    this.formatMap();
+    this.download(
+      { data: this.map, spawnPosition: this.spawnPos },
+      TEST_MAP ? "test.json" : "map.json"
+    );
+    const celldata: Celldata[] = [];
+    const vals = this.celldata.values();
+    let val: IteratorResult<object, any>;
+    while (!(val = vals.next()).done) {
+      celldata.push(val.value as Celldata);
+    }
+    celldata.sort((a: Celldata, b: Celldata) =>
+      a.cell.y !== b.cell.y ? a.cell.y - b.cell.y : a.cell.x - b.cell.x
+    );
+    this.download(
+      { data: celldata },
+      TEST_MAP ? "testCelldata.json" : "mapCelldata.json"
+    );
   }
 }

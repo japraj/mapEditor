@@ -16,6 +16,7 @@ export enum CellType {
   CRUSHER = 14,
   YEETER = 15,
   LAVA = 16,
+  SIGN = 17,
   SPAWN_POS = 999, // does not get written to map data; the Canvas handles this specially!
 }
 
@@ -28,6 +29,8 @@ export interface Cell {
   type: CellType;
   /** Color in hex that is used for cells of this type on the canvas */
   color: number;
+  /** Does this cell type have Celldata associated with it? */
+  celldata?: boolean;
 }
 
 // ! The order of the CELL_DEFNS must be the same as the order in which they
@@ -102,7 +105,12 @@ export const CELL_DEFNS: Cell[] = [
   },
   {
     type: CellType.LAVA,
-    color: 0xbf5c00,
+    color: 0xffa705,
+  },
+  {
+    type: CellType.SIGN,
+    color: 0xaa4d25,
+    celldata: true,
   },
 ];
 

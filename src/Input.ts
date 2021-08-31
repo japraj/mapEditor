@@ -38,6 +38,7 @@ const KEY_INPUTS: {
   c: CellType.CRUSHER,
   v: CellType.YEETER,
   b: CellType.LAVA,
+  n: CellType.SIGN,
 };
 
 /**
